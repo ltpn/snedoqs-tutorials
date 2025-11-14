@@ -45,7 +45,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Checkout buildfiles
-        run: git fetch && git checkout origin/main -- Project.toml Manifest.toml requirements.txt
+        run: git fetch && git checkout origin/main -- Project.toml requirements.txt
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
