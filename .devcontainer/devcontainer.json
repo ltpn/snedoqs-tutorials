@@ -3,7 +3,7 @@
 
 	"name": "snedoqs-tutorials",
 
-	"image": "ghcr.io/ltpn/snedoqs-tutorialss:docker",
+	"image": "ghcr.io/ltpn/snedoqs-tutorials:docker",
 
 	// Configure tool-specific properties.
 	"customizations": {
