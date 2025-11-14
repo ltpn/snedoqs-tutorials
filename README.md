@@ -1,0 +1,36 @@
+# SNEDOQS Tutorials
+
+This repository contains tutorials for the School on Non-Equilibrium Dynamics of Open Quantum Systems.
+
+## Run Online
+
+Click the button below to open the exercises in a new Codespace:
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/ltpn/snedoqs-tutorials/tree/main?quickstart=1)
+
+## Run Locally
+
+While Codespaces are great for learning/experimenting, we advise to set up a local environment on your computer for more in-depth work.
+
+The steps are generally as follows.
+1. Install common prerequisites like [Git](https://github.com/git-guides/install-git), [VS Code](https://code.visualstudio.com/download), and/or [Jupyter](https://jupyter.org/install).
+2. Install the software stack related to the language you want to use
+   * [Julia](https://julialang.org/downloads/) (+ optional [Julia/Jupyter](https://github.com/JuliaLang/IJulia.jl) integration)
+   * [Python](FILLME) (+ optional  [Python/Jupyter](FILLME) integration)
+3. Clone the repo via:  
+   ```shell
+   git clone https://github.com/ltpn/snedoqs-tutorials.git
+   cd snedoqs-tutorials
+   ```
+4. If using Julia, launch `julia` from the command line in the `julia` folder and install the dependencies:
+   ```julia
+   ]
+   activate .
+   instantiate
+   ```
+5. Code!
+
+## Tips
+
+- If you don't know how to use Git, learn it; it will be worth the effort. You can get started with [this](https://nbviewer.org/github/ICESAT-2HackWeek/intro-jupyter-git/blob/master/03-Git-Tutorial.ipynb) great interactive tutorial, and/or consult GitHub's [Git Guide](https://github.com/git-guides).
+- Containers are another way to develop locally on your computer via pre-built environments that contain all the dependencies you need (spoiler: this is how we power the Codespaces). If you're interested, we have a short [guide](Container_Guide.md) on that.
