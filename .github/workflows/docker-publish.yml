@@ -164,7 +164,7 @@ jobs:
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
 
   merge:
-    name: Marge multi-arch images
+    name: Merge multi-arch images
     needs: build
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
