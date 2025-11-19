@@ -179,6 +179,9 @@ jobs:
         with:
           cosign-release: 'v2.2.4'
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
+
       - name: Log into registry ${{ env.REGISTRY }}
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
         with:
@@ -192,29 +195,20 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      - name: Create and push manifest list
+      - name: Create and push multi-arch manifests
         run: |
           set -euo pipefail
-      
           IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
       
-          # For every tag from metadata, create and push a manifest
+          # steps.meta.outputs.tags is a newline-separated list of fully-qualified tags
           while read -r TAG; do
             [ -z "$TAG" ] && continue
       
-            echo "Creating manifest for ${TAG}"
-            docker manifest create "${TAG}" \
-              --amend "${IMAGE}:amd64" \
-              --amend "${IMAGE}:arm64"
-      
-            echo "Pushing manifest ${TAG}"
-            docker manifest push "${TAG}"
-          done <<< "${{ steps.meta.outputs.tags }}"
-
-          # Push all manifests
-          while read -r TAG; do
-            [ -z "$TAG" ] && continue
-            docker manifest push "$TAG"
+            echo "Creating multi-arch image for ${TAG}"
+            docker buildx imagetools create \
+              -t "$TAG" \
+              "${IMAGE}:amd64" \
+              "${IMAGE}:arm64"
           done <<< "${{ steps.meta.outputs.tags }}"
 
       - name: Sign the multi-arch image manifests
