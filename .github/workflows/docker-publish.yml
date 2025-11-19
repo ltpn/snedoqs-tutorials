@@ -31,8 +31,20 @@ env:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        platform: [amd64, arm64]
+        include:
+          - platform: amd64
+            runner: ubuntu-24.04
+            docker_platform: linux/amd64
+          - platform: arm64
+            runner: ubuntu-24.04-arm
+            docker_platform: linux/arm64
 
-    runs-on: ubuntu-latest
+    name: Build Docker image for ${{ matrix.docker_platform }}
+
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
       packages: write
@@ -85,9 +97,6 @@ jobs:
           df . -h
           sudo du /usr/ -hx -d 4 --threshold=1G | sort -hr | head
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
       # Install the cosign tool except on PR
       # https://github.com/sigstore/cosign-installer
       - name: Install cosign
@@ -119,6 +128,10 @@ jobs:
         uses: docker/metadata-action@96383f45573cb7f253c731d3b3ab81c87ef81934 # v5.0.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            # Only use arch-specific tags for the individual build push
+            type=raw,value=${{ matrix.platform }}
+            type=raw,value=${{ github.sha }}-${{ matrix.platform }}
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
@@ -126,7 +139,7 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.docker_platform }}
           context: .
           file: Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
@@ -149,3 +162,68 @@ jobs:
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+
+  merge:
+    name: Marge multi-arch images
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Install cosign
+        uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 #v3.5.0
+        with:
+          cosign-release: 'v2.2.4'
+
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ env.USERNAME }}
+          password: ${{ env.PASSWORD }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@96383f45573cb7f253c731d3b3ab81c87ef81934 # v5.0.0
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Create and push manifest list
+        run: |
+          set -euo pipefail
+      
+          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+      
+          # Pull the architecture-specific images (already pushed by matrix jobs)
+          docker pull "${IMAGE}:amd64"
+          docker pull "${IMAGE}:arm64"
+      
+          # For every tag from metadata, create and push a manifest
+          while read -r TAG; do
+            [ -z "$TAG" ] && continue
+      
+            echo "Creating manifest for ${TAG}"
+            docker manifest create "${TAG}" \
+              --amend "${IMAGE}:amd64" \
+              --amend "${IMAGE}:arm64"
+      
+            echo "Pushing manifest ${TAG}"
+            docker manifest push "${TAG}"
+          done <<< "${{ steps.meta.outputs.tags }}"
+
+          # Push all manifests
+          while read -r TAG; do
+            [ -z "$TAG" ] && continue
+            docker manifest push "$TAG"
+          done <<< "${{ steps.meta.outputs.tags }}"
+
+      - name: Sign the multi-arch image manifests
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          # cosign can sign by tag; Rekor entry will use the digest under the hood
+          echo "${TAGS}" | xargs -I {} cosign sign --yes {}
