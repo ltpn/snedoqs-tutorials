@@ -20,5 +20,5 @@ jobs:
           type: container
           names: |
             snedoqs-tutorials
-          keep: 3
-          dry-run: true
+          keep: 12  # 5 per arch + 2 for the multi-arch image
+          # dry-run: true
