@@ -1,0 +1,24 @@
+name: Cleanup old Docker images
+
+on:
+  schedule:
+    - cron: '43 21 * * *'
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Delete old packages
+        uses: SmartsquareGmbH/delete-old-packages@v0.8.1
+        with:
+          organization: ltpn
+          type: container
+          names: |
+            snedoqs-tutorials
+          keep: 3
+          dry-run: true
