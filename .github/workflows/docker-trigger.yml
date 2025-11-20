@@ -15,5 +15,9 @@ on:
 
 jobs:
   call-docker-workflow:
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     uses: ltpn/snedoqs-tutorials/.github/workflows/docker-publish.yml@docker
     secrets: inherit
