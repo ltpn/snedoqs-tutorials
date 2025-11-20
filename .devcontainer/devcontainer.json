@@ -5,6 +5,9 @@
 
 	"image": "ghcr.io/ltpn/snedoqs-tutorials:docker",
 
+	// Workaround https://github.com/microsoft/vscode-remote-release/issues/7104
+	"initializeCommand": "(docker pull ghcr.io/ltpn/snedoqs-tutorials:docker && docker image prune --filter 'label=ghcr.io/ltpn/snedoqs-tutorials:docker' -f) || true",
+
 	// Configure tool-specific properties.
 	"customizations": {
 		"vscode": {
@@ -17,7 +20,7 @@
 		}
 	},
 
-	"postStartCommand": "cp -n /opt/julia/environments/v1.12/Manifest.toml . && clear && $SHELL"
+	"postStartCommand": "cp -n /opt/julia/environments/v1.12/Manifest.toml . && clear && $SHELL -i"
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
