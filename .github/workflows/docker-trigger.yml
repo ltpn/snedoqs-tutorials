@@ -15,4 +15,5 @@ on:
 
 jobs:
   call-docker-workflow:
-    uses: ${{ github.repository }}/.github/workflows/docker-publish.yml@docker
+    uses: ltpn/snedoqs-tutorials/.github/workflows/docker-publish.yml@docker
+    secrets: inherit
