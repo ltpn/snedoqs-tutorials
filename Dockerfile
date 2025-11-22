@@ -31,10 +31,10 @@ RUN set -eux; \
     # Set the proper CPU target for Julia, see https://github.com/docker-library/julia/issues/79
     case "$arch" in \
         'amd64') \
-            export JULIA_CPU_TARGET="generic;sandybridge,-xsaveopt,clone_all;haswell,-rdrnd,base(1)"; \
+            export JULIA_CPU_TARGET="generic;sandybridge,-xsaveopt,clone_all;haswell,-rdrnd,base(1);x86-64-v4,-rdrnd,base(1)"; \
             ;; \
         'arm64') \
-            export JULIA_CPU_TARGET="generic;cortex-a57;thunderx2t99;carmel"; \
+            export JULIA_CPU_TARGET="generic;cortex-a57;thunderx2t99;carmel,clone_all;apple-m1,base(3);neoverse-512tvb,base(3)"; \
             ;; \
         *) \
             echo >&2 "error: current architecture ($arch) is not supported in this container"; \
