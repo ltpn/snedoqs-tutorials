@@ -15,7 +15,8 @@
 				"ms-python.python",
 				"ms-toolsai.jupyter",
 				"julialang.language-julia@prerelease",
-				"h5web.vscode-h5web"
+				"h5web.vscode-h5web",
+				"mathematic.vscode-pdf"
 			],
 			"settings": {
 				"julia.symbolCacheDownload": true,
